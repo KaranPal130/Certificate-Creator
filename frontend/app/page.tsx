@@ -61,6 +61,7 @@ const formSchema = z.object({
 export default function Home() {
   const [date, setDate] = useState<Date>();
   const [isLoading, setIsLoading] = useState(false)
+  const [certificate, setCertificate] = useState<any>("")
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,10 +72,10 @@ export default function Home() {
     },
   });
 
-  // if (isLoading) return <Loading />;
+  if (isLoading) return <Loading />;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { toast } = useToast()
+    // const { toast } = useToast()
     try{
       const obj = {
         recipientName: values.recipientName,
@@ -84,19 +85,22 @@ export default function Home() {
       }
       setIsLoading(true)
       let result = await axios.post(`${nextConfig.API_URL}/create`, obj);
-      // if(result) {
-      //   toast({
-      //     title: "Certificate Created Sucessfully",
-      //     description: `${result}`,
-      //   })
-      // }
+      setIsLoading(false)
+      console.log(result)
+      if(result) {
+        setIsLoading(false)
+        setCertificate(result.data.certificateID)
+      }
     } catch(err) {
       console.log(err)
     }
   }
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center p-24">
       <h1>Create Certiicate</h1>
+      <div className="text-green-400 m-b-1">
+        Certificated Created Sucessfully Here is certificate ID: {certificate}
+      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
@@ -179,6 +183,10 @@ export default function Home() {
           <Button type="submit">Submit</Button>
         </form>
       </Form>
+
+      <div className="text-green-400">
+        {certificate}
+      </div>
     </main>
   );
 }
